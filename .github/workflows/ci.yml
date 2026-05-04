@@ -507,7 +507,7 @@ jobs:
           echo "App version: ${APP_VERSION}"
 
       - name: Download Windows build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: filetools-windows-portable-v${{ env.FILETOOLS_VERSION }}
           path: ./build
@@ -601,7 +601,7 @@ jobs:
           echo "App version: ${APP_VERSION}"
 
       - name: Download Linux build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: filetools-linux-installers-v${{ env.FILETOOLS_VERSION }}
           path: ./build
@@ -713,7 +713,7 @@ jobs:
           echo "App version: ${APP_VERSION}"
 
       - name: Download macOS build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: filetools-macos-arm64-dmg-v${{ env.FILETOOLS_VERSION }}
           path: ./build
@@ -827,7 +827,7 @@ jobs:
           echo "App version: ${APP_VERSION}"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: filetools-*-v${{ steps.version.outputs.version }}
           path: release-artifacts
