@@ -16,7 +16,7 @@
     "playwright": "^1.59.1"
   },
   "dependencies": {
-    "@tauri-apps/plugin-dialog": "^2.7.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-shell": "^2.3.5"
   }
 }
