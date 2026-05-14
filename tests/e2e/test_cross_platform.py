@@ -78,10 +78,12 @@ class TestCrossPlatform:
 
         for viewport in viewports:
             page.set_viewport_size(viewport)
-            # NOTE: Use smart wait or remove
+            # 等待页面重新渲染和布局调整
+            page.wait_for_load_state("networkidle")
 
             # 验证关键元素仍然可见
             search_input = page.locator('input[type="text"]').first
+            search_input.wait_for(state="visible", timeout=5000)
             assert search_input.is_visible(), f"搜索框在 {viewport} 下应可见"
 
 

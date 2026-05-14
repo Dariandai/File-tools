@@ -1,0 +1,17 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Force LF line endings for specific files
+pyproject.toml text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
+*.rs text eol=lf
+
+# Ensure Windows batch files keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf

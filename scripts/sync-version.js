@@ -31,7 +31,7 @@ cargoContent = cargoContent.replace(
   /^version = "[^"]+"/m,
   `version = "${VERSION}"`
 );
-fs.writeFileSync(cargoPath, cargoContent);
+fs.writeFileSync(cargoPath, cargoContent.replace(/\r\n/g, '\n'));
 console.log('✓ Updated Cargo.toml');
 
 // 3. 更新 package.json
@@ -48,7 +48,7 @@ pyprojectContent = pyprojectContent.replace(
   /^\s*version = "[^"]+"/m,
   `version = "${VERSION}"`
 );
-fs.writeFileSync(pyprojectPath, pyprojectContent);
+fs.writeFileSync(pyprojectPath, pyprojectContent.replace(/\r\n/g, '\n'));
 console.log('✓ Updated pyproject.toml');
 
 // 5. 更新 VERSION 文件
