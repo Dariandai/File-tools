@@ -127,10 +127,10 @@ const FileToolsSettings = (function () {
 
         // 本地模型设置：统一使用 ai_model.local（减少重复配置）
         if (config.ai_model && config.ai_model.local) {
-            setValue('localApiUrlInput', config.ai_model.local.api_url || 'http://localhost:8000/v1/chat/completions');
+            setValue('localApiUrlInput', config.ai_model.local.api_url || 'http://localhost:11434/v1/chat/completions');
         } else if (config.local_model) {
             // 向后兼容（旧配置）
-            setValue('localApiUrlInput', config.local_model.api_url || 'http://localhost:8000/v1/chat/completions');
+            setValue('localApiUrlInput', config.local_model.api_url || 'http://localhost:11434/v1/chat/completions');
         }
 
         // RAG 设置：统一字段为 max_history_turns / max_history_chars
@@ -202,7 +202,7 @@ const FileToolsSettings = (function () {
                     presence_penalty: getFloat('presencePenaltyRange', 0.0)
                 },
                 local: {
-                    api_url: getValue('localApiUrlInput', 'http://localhost:8000/v1/chat/completions')
+                    api_url: getValue('localApiUrlInput', 'http://localhost:11434/v1/chat/completions')
                 }
             },
             // 统一写入 ai_model.local，避免 local_model 双写导致参数不生效
@@ -805,7 +805,7 @@ const FileToolsSettings = (function () {
         if (apiSettings) apiSettings.style.display = 'none';
 
         // 本地 API URL 重置
-        safeSetValue('localApiUrlInput', 'http://localhost:8000/v1/chat/completions');
+        safeSetValue('localApiUrlInput', 'http://localhost:11434/v1/chat/completions');
 
         // RAG 设置重置 (元素可能不存在)
         safeSetValue('ragTopKInput', 5);

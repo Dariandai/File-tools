@@ -5,26 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.3] - 2026-04-27
 
 ### Added
 - 支持多提供商 API Keys 缓存（SiliconFlow、DeepSeek、Custom）
 - 新增 `model_size_params` 自动检测本地模型大小（1B/3B/7B/13B/70B）
+- 添加 .gitattributes 规范行结束符，避免跨平台构建问题
 
 ### Changed
 - **配置保存修复**：scan_paths 和 monitor.directories 为空时不再自动填充 Documents 路径
-- **本地模型默认端口**：从 `8000` 改为 `11434`（Ollama 默认端口）
+- **本地模型默认端口**：从 `8000` 改为 `11434`（与 Ollama 默认端口一致）
 - 统一采样参数结构：`ai_model.sampling` 和 `ai_model.penalties` 层级
 - ConfigLoader 支持自动创建用户数据目录
+- 改进日志格式和错误处理
+- 重构 CI 配置，提升代码可读性
 
 ### Fixed
 - 修复配置保存后 scan_paths/directories 被重置为空的问题
 - 修复 `api_key` 返回时未正确掩码的问题
 - 修复文件监控目录遍历攻击安全漏洞
+- 修复 E2E 测试中视口响应式布局的时序竞争问题
+- 修复 SSL 证书校验在企业代理环境下的问题
 
 ### Security
 - 目录路径验证增强（防止路径遍历攻击）
 - API Keys 返回时强制掩码处理
+
+### Performance
+- 在 search_vector 中缓存文件内容，避免重复 I/O
 
 ## [1.1.2] - 2026-04-15
 

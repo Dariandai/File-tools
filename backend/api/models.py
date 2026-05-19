@@ -134,7 +134,7 @@ class AIModelPenaltiesValidator(BaseModel):
 class AIModelLocalValidator(BaseModel):
     """AI模型本地模式配置验证"""
 
-    api_url: str = "http://localhost:8000/v1/chat/completions"
+    api_url: str = "http://localhost:11434/v1/chat/completions"
     max_context: int = 4096
     max_tokens: int = 512
 

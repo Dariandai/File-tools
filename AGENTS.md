@@ -8,7 +8,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 ```bash
 python main.py
 ```
-Opens browser automatically at http://127.0.0.1:8000 (auto-selects 8001-8010 if 8000 is occupied).
+Opens browser automatically at http://127.0.0.1:18642 (auto-selects 18643-18652 if 18642 is occupied).
 
 ### Development Commands
 ```bash

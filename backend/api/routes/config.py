@@ -377,7 +377,7 @@ async def get_config(config_loader: ConfigLoader = Depends(get_config_loader)):
                     "api_url": config_loader.get(
                         "ai_model",
                         "local.api_url",
-                        "http://localhost:8000/v1/chat/completions",
+                        "http://localhost:11434/v1/chat/completions",
                     ),
                     "max_context": config_loader.getint(
                         "ai_model", "local.max_context", 4096

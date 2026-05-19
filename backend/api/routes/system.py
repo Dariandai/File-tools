@@ -565,30 +565,53 @@ async def check_update():
 
     try:
         # 调用 GitHub API 获取最新 release
-        # 优先使用严格证书校验；若当前环境证书链异常，则降级重试以保证可用性。
+        # 优先使用严格证书校验；若当前环境证书链异常，则提示用户检查网络配置。
         update_url = f"https://api.github.com/repos/{repo}/releases/latest"
         request_headers = {"Accept": "application/vnd.github.v3+json"}
         request_timeout = 10
-        try:
-            response = requests.get(
-                update_url,
-                headers=request_headers,
-                timeout=request_timeout,
-                verify=certifi.where(),
-            )
-        except requests.exceptions.SSLError as ssl_err:
-            # 某些网络环境（企业代理/本地网关）会进行 HTTPS 证书替换，导致严格校验失败。
-            # 出于安全考虑不再降级到 verify=False，避免绕过证书校验。
-            if not _update_ssl_fallback_notified:
-                logger.info(
-                    "检查更新证书校验失败，请检查系统证书链或代理配置"
-                    f"（仅提示一次）: {ssl_err}"
+
+        import asyncio
+
+        def _fetch_update():
+            global _update_ssl_fallback_notified
+
+            class SSLErrorResult:
+                def __init__(self, error):
+                    self.ssl_error = error
+                    self.response = None
+
+            class SuccessResult:
+                def __init__(self, resp):
+                    self.response = resp
+                    self.ssl_error = None
+
+            try:
+                response = requests.get(
+                    update_url,
+                    headers=request_headers,
+                    timeout=request_timeout,
+                    verify=certifi.where(),
                 )
-                _update_ssl_fallback_notified = True
+                return SuccessResult(response)
+            except requests.exceptions.SSLError as ssl_err:
+                # 某些网络环境（企业代理/本地网关）会进行 HTTPS 证书替换，
+                # 导致严格校验失败。出于安全考虑不再降级到 verify=False。
+                if not _update_ssl_fallback_notified:
+                    logger.info(
+                        "检查更新证书校验失败，请检查系统证书链或代理配置"
+                        f"（仅提示一次）: {ssl_err}"
+                    )
+                    _update_ssl_fallback_notified = True
+                return SSLErrorResult(ssl_err)
+
+        # 在线程池中执行同步请求，避免阻塞事件循环
+        result_obj = await asyncio.to_thread(_fetch_update)
+        if result_obj.ssl_error is not None:
             raise HTTPException(
                 status_code=503,
                 detail="更新服务器证书校验失败，请检查网络代理或系统证书配置",
             )
+        response = result_obj.response
         response.raise_for_status()
         data = response.json()
 

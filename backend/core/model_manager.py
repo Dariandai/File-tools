@@ -112,7 +112,7 @@ class ModelManager:
     def _init_local_config(self):
         """初始化本地模型配置"""
         self.api_url = self.config_loader.get(
-            "ai_model", "local.api_url", "http://localhost:8000/v1/chat/completions"
+            "ai_model", "local.api_url", "http://localhost:11434/v1/chat/completions"
         )
         self.api_key = ""
         self.max_context = self.config_loader.getint(
