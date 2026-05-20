@@ -6,16 +6,16 @@ advanced:
   whoosh_mem_limit: 512
 ai_model:
   api:
-    api_key: ''
-    api_url: https://api.siliconflow.cn/v1/chat/completions
+    api_key: enc:gAAAAABqDU30pUiY1PXMWaeNe8Q4Q1_ITPsb__1zqw5AjcOTSNZ6sJnpmVgx-4TT77dtCpfw-5gUUUQnZNenvG0LXvDnWuAnz8IbRqDJs5WTqV1Xjg_AyUpBDgbYE5Q9Uu9GMQtItEma
+    api_url: https://api.deepseek.com/v1/chat/completions
     keys:
-      custom: ''
-      deepseek: ''
+      custom: enc:gAAAAABqDU30NIJEOwZ7EuA2xO0z4DWLNvFy4xxT87RkSQjm5pv5fchF9R2rmLcYixxo12UQOihXr9LxBZdswQ6CmKAmds-Vu2byg05DSO1PiV7Qnkj6NjApdpSY8PiHHWZ7aFWu2j02V7DiwNU2ZPtdkn_aYCYslxj7zp1fJI6db18vnVyB990=
+      deepseek: enc:gAAAAABqDU30aiTKFRmxn2e-APP-lkUdw18aSQZACuTqc9Rs4-WlxUfoIlOJ8RfPfIAfjxK0eR_qQ4lLC1K4rtG3I7KLKNg9810R7smjqcCHAQ8rWh2NAqOhzmeo4sqHX293Vcle_w2T
       siliconflow: ''
     max_context: 8192
     max_tokens: 2048
-    model_name: deepseek-ai/DeepSeek-V2.5
-    provider: siliconflow
+    model_name: deepseek-chat
+    provider: deepseek
     retrieval:
       chunk_overlap: 200
       chunk_size: 2000
@@ -27,7 +27,7 @@ ai_model:
     max_context: 4096
     max_tokens: 512
     model_name: local
-  mode: local
+  mode: api
   penalties:
     frequency_penalty: 0.0
     presence_penalty: 0.0
@@ -134,8 +134,8 @@ rag:
   max_context_chars: 4000
   max_context_chars_total: 8000
   max_docs: 3
-  max_history_chars: 1000
-  max_history_turns: 3
+  max_history_chars: 2048
+  max_history_turns: 5
   max_output_tokens: 2048
   prompt_template: '你是一名专业的中文文档分析助理。请基于【文档集合】中的内容，对用户的【问题】提供一个连贯、流畅、总结性的回答。
 

@@ -72,8 +72,10 @@ async def rebuild_index(
     # 限流检查
     if config_loader.getboolean("security", "rate_limiter.enabled", True):
         client_ip = get_client_ip(request, config_loader)
-        max_req = config_loader.getint("security", "rate_limiter.rebuild_limit", 1)
-        window = config_loader.getint("security", "rate_limiter.rebuild_window", 600)
+        max_req = config_loader.getint(
+            "security", "rate_limiter.rebuild_limit", 1)
+        window = config_loader.getint(
+            "security", "rate_limiter.rebuild_window", 600)
         if not limiter.is_allowed(
             f"rebuild:{client_ip}", max_requests=max_req, window=window
         ):
@@ -166,8 +168,10 @@ async def rebuild_index_stream(
     # 限流检查
     if config_loader.getboolean("security", "rate_limiter.enabled", True):
         client_ip = get_client_ip(request, config_loader)
-        max_req = config_loader.getint("security", "rate_limiter.rebuild_limit", 1)
-        window = config_loader.getint("security", "rate_limiter.rebuild_window", 600)
+        max_req = config_loader.getint(
+            "security", "rate_limiter.rebuild_limit", 1)
+        window = config_loader.getint(
+            "security", "rate_limiter.rebuild_window", 600)
         if not limiter.is_allowed(
             f"rebuild:{client_ip}", max_requests=max_req, window=window
         ):
@@ -467,7 +471,8 @@ async def health_check(
                 "indexed_documents": index_health.get("indexed_count", 0),
             }
         except Exception as e:
-            components["index_manager"] = {"status": "unhealthy", "error": str(e)}
+            components["index_manager"] = {
+                "status": "unhealthy", "error": str(e)}
 
         # 检查RAG管道（支持优雅降级状态）
         try:
@@ -475,7 +480,8 @@ async def health_check(
             rag_error = getattr(request.app.state, "rag_error", None)
 
             if rag_status == "ready":
-                components["rag_pipeline"] = {"status": "ready", "enabled": True}
+                components["rag_pipeline"] = {
+                    "status": "ready", "enabled": True}
             elif rag_status == "error":
                 components["rag_pipeline"] = {
                     "status": "error",
@@ -484,10 +490,12 @@ async def health_check(
                     "message": "AI功能暂时不可用，其他功能正常",
                 }
             elif getattr(request.app.state, "rag_initializing", False):
-                components["rag_pipeline"] = {"status": "initializing", "enabled": True}
+                components["rag_pipeline"] = {
+                    "status": "initializing", "enabled": True}
             else:
-                enabled = config_loader.getboolean("ai_model", "enabled", False)
-                components["rag_pipeline"] = {"status": "disabled", "enabled": enabled}
+                # 移除禁用开关，RAG 功能始终视为已启用，但可能未就绪
+                components["rag_pipeline"] = {
+                    "status": "not_ready", "enabled": True}
         except Exception as e:
             components["rag_pipeline"] = {"status": "error", "error": str(e)}
 

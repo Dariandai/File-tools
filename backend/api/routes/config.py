@@ -175,7 +175,8 @@ async def update_config(
             cond2 = "context_length" in rag_payload
             has_ctx = cond1 and cond2
             if has_ctx:
-                rag_payload["max_history_chars"] = rag_payload.get("context_length")
+                rag_payload["max_history_chars"] = rag_payload.get(
+                    "context_length")
 
         local_model_payload = body.get("local_model")
         ai_model_payload = body.get("ai_model")
@@ -208,7 +209,8 @@ async def update_config(
         validated_data: dict[str, Any] = {}
         if "ai_model" in body:
             try:
-                validated_data["ai_model"] = AIModelConfigValidator(**body["ai_model"])
+                validated_data["ai_model"] = AIModelConfigValidator(
+                    **body["ai_model"])
             except ValidationError as e:
                 raise HTTPException(
                     status_code=400,
@@ -226,7 +228,8 @@ async def update_config(
 
         if "search" in body:
             try:
-                validated_data["search"] = SearchConfigValidator(**body["search"])
+                validated_data["search"] = SearchConfigValidator(
+                    **body["search"])
             except ValidationError as e:
                 raise HTTPException(
                     status_code=400,
@@ -370,7 +373,8 @@ async def get_config(config_loader: ConfigLoader = Depends(get_config_loader)):
 
         config = {
             "ai_model": {
-                "enabled": config_loader.getboolean("ai_model", "enabled", False),
+                # 移除前端开关影响：始终返回已启用状态
+                "enabled": True,
                 "mode": mode,
                 "system_prompt": config_loader.get("ai_model", "system_prompt", ""),
                 "local": {
@@ -459,7 +463,8 @@ async def get_config(config_loader: ConfigLoader = Depends(get_config_loader)):
             },
             "migration_notice": _detect_index_path_migration_notice(config_loader),
         }
-        scan_paths = config["file_scanner"]["scan_paths"]  # type: ignore[index]
+        # type: ignore[index]
+        scan_paths = config["file_scanner"]["scan_paths"]
         if isinstance(scan_paths, str):
             config["file_scanner"]["scan_paths"] = [  # type: ignore[index]
                 p.strip() for p in scan_paths.split(";") if p.strip()
@@ -471,8 +476,10 @@ async def get_config(config_loader: ConfigLoader = Depends(get_config_loader)):
         else:
             config["file_scanner"]["scan_paths"] = []  # type: ignore[index]
         # 兼容旧前端字段读取；写入统一走 max_history_*。
-        config["rag"]["top_k"] = config["rag"]["max_history_turns"]  # type: ignore[index]
-        config["rag"]["context_length"] = config["rag"]["max_history_chars"]  # type: ignore[index]
+        # type: ignore[index]
+        config["rag"]["top_k"] = config["rag"]["max_history_turns"]
+        # type: ignore[index]
+        config["rag"]["context_length"] = config["rag"]["max_history_chars"]
         return config
     except Exception as e:
         logger.exception("获取配置错误")

@@ -97,8 +97,10 @@ class ModelManager:
             logger.warning(
                 "SSL证书验证已禁用，这会降低安全性，仅建议用于自签名证书或内网环境"
             )
-        self.timeout = config_loader.getint("ai_model", "security.timeout", 120)
-        self.retry_count = config_loader.getint("ai_model", "security.retry_count", 2)
+        self.timeout = config_loader.getint(
+            "ai_model", "security.timeout", 120)
+        self.retry_count = config_loader.getint(
+            "ai_model", "security.retry_count", 2)
 
         # 根据模式加载配置
         if self.mode == ModelMode.LOCAL:
@@ -153,7 +155,8 @@ class ModelManager:
         """
         try:
             # 构造 /v1/models 端点 URL
-            base_url = self.api_url.replace("/v1/chat/completions", "").rstrip("/")
+            base_url = self.api_url.replace(
+                "/v1/chat/completions", "").rstrip("/")
             models_url = f"{base_url}/v1/models"
 
             response = requests.get(models_url, timeout=5)
@@ -181,12 +184,15 @@ class ModelManager:
             "ai_model", "api.api_url", "https://api.siliconflow.cn/v1/chat/completions"
         )
         # 获取当前provider
-        provider = self.config_loader.get("ai_model", "api.provider", "siliconflow")
+        provider = self.config_loader.get(
+            "ai_model", "api.provider", "siliconflow")
         # 优先从新的多provider结构获取key
-        self.api_key = self.config_loader.get("ai_model", f"api.keys.{provider}", "")
+        self.api_key = self.config_loader.get(
+            "ai_model", f"api.keys.{provider}", "")
         if not self.api_key:
             # 回退到旧配置
-            self.api_key = self.config_loader.get("ai_model", "api.api_key", "")
+            self.api_key = self.config_loader.get(
+                "ai_model", "api.api_key", "")
         self.model_name = self.config_loader.get(
             "ai_model", "api.model_name", "deepseek-ai/DeepSeek-V2.5"
         )
@@ -416,11 +422,7 @@ class ModelManager:
             生成的文本片段
         """
         try:
-            # 检查模型是否启用
-            model_enabled = self.config_loader.getboolean("ai_model", "enabled", False)
-            if not model_enabled:
-                yield "AI功能未启用，请在设置中开启"
-                return
+            # 运行时不再依赖 ai_model.enabled 开关，始终尝试生成（错误由下层处理）
 
             # 隐私保护：脱敏处理
             redacted_prompt = self.privacy_guard.redact(prompt)
@@ -491,7 +493,8 @@ class ModelManager:
             request_url = self._normalize_url(self.api_url)
 
             # 获取系统提示词
-            system_prompt = self.config_loader.get("ai_model", "system_prompt", "")
+            system_prompt = self.config_loader.get(
+                "ai_model", "system_prompt", "")
 
             # 构建消息列表
             messages = []

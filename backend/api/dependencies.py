@@ -79,7 +79,8 @@ def get_search_engine(
         if not hasattr(_app.state, "search_engine"):
             from backend.core.search_engine import SearchEngine
 
-            _app.state.search_engine = SearchEngine(index_manager, config_loader)
+            _app.state.search_engine = SearchEngine(
+                index_manager, config_loader)
         return _app.state.search_engine
 
 
@@ -96,7 +97,8 @@ def get_file_scanner(
         if not hasattr(_app.state, "file_scanner"):
             from backend.core.file_scanner import FileScanner
 
-            _app.state.file_scanner = FileScanner(config_loader, None, index_manager)
+            _app.state.file_scanner = FileScanner(
+                config_loader, None, index_manager)
         return _app.state.file_scanner
 
 
@@ -107,27 +109,23 @@ def get_rag_pipeline(
     """获取RAG管道（可选，禁用时返回None）"""
     with _app_lock:
         if _app is None:
-            if config_loader.getboolean("ai_model", "enabled", False):
-                from backend.core.model_manager import ModelManager
-                from backend.core.rag_pipeline import RAGPipeline
+            from backend.core.model_manager import ModelManager
+            from backend.core.rag_pipeline import RAGPipeline
 
-                model_manager = ModelManager(config_loader)
-                logger.info("RAG管道初始化完成")
-                return RAGPipeline(model_manager, config_loader, search_engine)
-            else:
-                return None
+            # 始终创建 RAGPipeline，移除 ai_model.enabled 开关
+            model_manager = ModelManager(config_loader)
+            logger.info("RAG管道初始化完成")
+            return RAGPipeline(model_manager, config_loader, search_engine)
         if not hasattr(_app.state, "rag_pipeline"):
-            if config_loader.getboolean("ai_model", "enabled", False):
-                from backend.core.model_manager import ModelManager
-                from backend.core.rag_pipeline import RAGPipeline
+            from backend.core.model_manager import ModelManager
+            from backend.core.rag_pipeline import RAGPipeline
 
-                model_manager = ModelManager(config_loader)
-                _app.state.rag_pipeline = RAGPipeline(
-                    model_manager, config_loader, search_engine
-                )
-                logger.info("RAG管道初始化完成")
-            else:
-                _app.state.rag_pipeline = None
+            # 始终创建 RAGPipeline，移除 ai_model.enabled 开关
+            model_manager = ModelManager(config_loader)
+            _app.state.rag_pipeline = RAGPipeline(
+                model_manager, config_loader, search_engine
+            )
+            logger.info("RAG管道初始化完成")
         return _app.state.rag_pipeline
 
 
@@ -141,7 +139,8 @@ def get_file_monitor(
         if _app is None:
             from backend.core.file_monitor import FileMonitor
 
-            file_monitor = FileMonitor(config_loader, index_manager, file_scanner)
+            file_monitor = FileMonitor(
+                config_loader, index_manager, file_scanner)
             if config_loader.getboolean("monitor", "enabled", False):
                 file_monitor.start_monitoring()
                 logger.info("文件监控已启动")

@@ -46,8 +46,10 @@ async def chat(
     if config_loader.getboolean("security", "rate_limiter.enabled", True):
         # 获取客户端IP（使用安全方式）
         client_ip = get_client_ip(http_request, config_loader)
-        max_req = config_loader.getint("security", "rate_limiter.chat_limit", 10)
-        window = config_loader.getint("security", "rate_limiter.chat_window", 60)
+        max_req = config_loader.getint(
+            "security", "rate_limiter.chat_limit", 10)
+        window = config_loader.getint(
+            "security", "rate_limiter.chat_window", 60)
         if not limiter.is_allowed(
             f"chat:{client_ip}", max_requests=max_req, window=window
         ):
@@ -55,14 +57,6 @@ async def chat(
 
     # 检查RAG管道是否就绪，如果正在初始化则等待
     if not rag_pipeline:
-        if not config_loader.getboolean("ai_model", "enabled", False):
-            return {
-                "answer": (
-                    "AI 问答功能未启用。请前往 设置 → 接入模式 中配置并启用 AI 模型。"
-                ),
-                "sources": [],
-            }
-
         # 如果正在后台初始化，使用 asyncio.Event 等待
         _app = http_request.app
         if getattr(_app.state, "rag_initializing", False):
@@ -71,7 +65,8 @@ async def chat(
             try:
                 # 使用事件等待，最多10秒
                 await asyncio.wait_for(
-                    getattr(_app.state, "rag_ready_event", asyncio.Event()).wait(),
+                    getattr(_app.state, "rag_ready_event",
+                            asyncio.Event()).wait(),
                     timeout=10.0,
                 )
                 if _app.state.rag_pipeline:
@@ -88,7 +83,7 @@ async def chat(
         else:
             raise HTTPException(
                 status_code=500,
-                detail="AI 问答服务未就绪，请前往 设置 → 接入模式 检查配置。",
+                detail="AI 问答服务未就绪，请稍后重试。",
             )
 
     try:
@@ -132,8 +127,10 @@ async def chat_stream(
     # 限流检查（与非流式端点保持一致）
     if config_loader.getboolean("security", "rate_limiter.enabled", True):
         client_ip = get_client_ip(http_request, config_loader)
-        max_req = config_loader.getint("security", "rate_limiter.chat_limit", 10)
-        window = config_loader.getint("security", "rate_limiter.chat_window", 60)
+        max_req = config_loader.getint(
+            "security", "rate_limiter.chat_limit", 10)
+        window = config_loader.getint(
+            "security", "rate_limiter.chat_window", 60)
         if not limiter.is_allowed(
             f"chat:{client_ip}", max_requests=max_req, window=window
         ):
@@ -141,29 +138,14 @@ async def chat_stream(
 
     # 检查 RAG 管道是否就绪，如果正在初始化则等待
     if not rag_pipeline:
-        if not config_loader.getboolean("ai_model", "enabled", False):
-
-            async def _disabled_stream():
-                payload = {
-                    "type": "answer",
-                    "content": (
-                        "AI 问答功能未启用。"
-                        "请前往 设置 → 接入模式 中配置并启用 AI 模型。"
-                    ),
-                }
-                yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
-                empty_sources = {"type": "sources", "content": []}
-                yield (f"data: {json.dumps(empty_sources, ensure_ascii=False)}\n\n")
-
-            return StreamingResponse(_disabled_stream(), media_type="text/event-stream")
-
         _app = http_request.app
         if getattr(_app.state, "rag_initializing", False):
             import asyncio
 
             try:
                 await asyncio.wait_for(
-                    getattr(_app.state, "rag_ready_event", asyncio.Event()).wait(),
+                    getattr(_app.state, "rag_ready_event",
+                            asyncio.Event()).wait(),
                     timeout=10.0,
                 )
                 if _app.state.rag_pipeline:
@@ -179,8 +161,7 @@ async def chat_stream(
                 )
         else:
             raise HTTPException(
-                status_code=500,
-                detail="AI 问答服务未就绪，请前往 设置 → 接入模式 检查配置。",
+                status_code=500, detail="AI 问答服务未就绪，请稍后重试"
             )
 
     query = request.query

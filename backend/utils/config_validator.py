@@ -423,16 +423,15 @@ class ConfigValidator:
 
     def _validate_ai_model_config(self, result: ValidationResult) -> None:
         """验证AI模型配置"""
-        enabled = self._getboolean("ai_model", "enabled", False)
-        if not enabled:
-            return
+        # 始终验证 AI 配置（移除对 ai_model.enabled 的依赖）
 
         mode = self._get_value("ai_model", "mode", "local")
 
         if mode == "api":
             api_config = self._get_value("ai_model", "api", {})
             api_key = (
-                api_config.get("api_key", "") if isinstance(api_config, dict) else ""
+                api_config.get("api_key", "") if isinstance(
+                    api_config, dict) else ""
             )
             if not api_key:
                 result.add_warning(
@@ -443,7 +442,8 @@ class ConfigValidator:
                 )
 
             api_url = (
-                api_config.get("api_url", "") if isinstance(api_config, dict) else ""
+                api_config.get("api_url", "") if isinstance(
+                    api_config, dict) else ""
             )
             if not api_url:
                 result.add_error(
@@ -477,7 +477,8 @@ class ConfigValidator:
 
                 windll = getattr(ctypes, "windll", None)
                 shell32 = (
-                    getattr(windll, "shell32", None) if windll is not None else None
+                    getattr(windll, "shell32",
+                            None) if windll is not None else None
                 )
                 is_user_admin = (
                     getattr(shell32, "IsUserAnAdmin", None)

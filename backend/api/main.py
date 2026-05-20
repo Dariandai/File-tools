@@ -2,6 +2,7 @@
 FastAPI 应用主文件 - 初始化和生命周期管理
 """
 
+from starlette.staticfiles import StaticFiles as StarletteStaticFiles
 import os
 import threading
 import time
@@ -72,7 +73,8 @@ class RateLimiter:
                 except Exception as e:
                     logger.warning(f"限流器清理线程异常：{e}")
 
-        self._cleanup_thread = threading.Thread(target=cleanup_loop, daemon=True)
+        self._cleanup_thread = threading.Thread(
+            target=cleanup_loop, daemon=True)
         self._cleanup_thread.start()
         logger.info(f"限流器后台清理线程已启动，间隔 {self._cleanup_interval}秒")
 
@@ -115,7 +117,8 @@ class RateLimiter:
                 self._requests[key] = []
 
             # 移除窗口期外的请求记录
-            self._requests[key] = [t for t in self._requests[key] if now - t < window]
+            self._requests[key] = [
+                t for t in self._requests[key] if now - t < window]
 
             # 检查是否超过限制
             if len(self._requests[key]) >= max_requests:
@@ -506,7 +509,8 @@ async def lifespan(app: FastAPI):
                 app.state.rag_error = None
                 logger.info("RAG 管道后台初始化完成")
                 # 通知等待的协程 RAG 已就绪
-                asyncio.run_coroutine_threadsafe(_set_rag_ready(), app.state.main_loop)
+                asyncio.run_coroutine_threadsafe(
+                    _set_rag_ready(), app.state.main_loop)
             except Exception as e:
                 logger.exception("RAG 管道初始化失败")
                 app.state.rag_pipeline = None
@@ -519,21 +523,28 @@ async def lifespan(app: FastAPI):
             """设置 RAG 就绪事件"""
             app.state.rag_ready_event.set()
 
-        # 如果 AI 功能启用，在后台线程初始化 RAG
-        if config_loader.getboolean("ai_model", "enabled", False):
-            import threading
+        # 同步初始化 RAG 管道，确保启动完成后 RAG 就绪
+        app.state.rag_initializing = True
+        try:
+            from backend.core.model_manager import ModelManager
+            from backend.core.rag_pipeline import RAGPipeline
 
-            # 使用锁防止重复启动初始化线程
-            if not getattr(app.state, "rag_initializing", False) and not getattr(
-                app.state, "rag_init_thread", None
-            ):
-                app.state.rag_init_thread = threading.Thread(
-                    target=init_rag_pipeline, daemon=True
-                )
-                app.state.rag_init_thread.start()
-                logger.info("RAG 管道后台初始化已启动")
-            else:
-                logger.debug("RAG 初始化已在进行中或已完成，跳过重复启动")
+            model_manager = ModelManager(config_loader)
+            app.state.rag_pipeline = RAGPipeline(
+                model_manager, config_loader, app.state.search_engine
+            )
+            app.state.rag_status = "ready"
+            app.state.rag_error = None
+            logger.info("RAG 管道同步初始化完成，已就绪")
+            # 通知等待的协程 RAG 已就绪
+            await _set_rag_ready()
+        except Exception as e:
+            logger.exception("RAG 管道同步初始化失败")
+            app.state.rag_pipeline = None
+            app.state.rag_status = "error"
+            app.state.rag_error = str(e)
+        finally:
+            app.state.rag_initializing = False
 
         # 如果需要，处理模式更新
         if getattr(index_manager, "schema_updated", False):
@@ -702,7 +713,6 @@ app.include_router(system.router, prefix="/api")
 # 挂载静态文件目录
 # 开发模式（FILETOOLS_DEV_MODE=1/true）禁用缓存便于热重载；
 # 生产环境使用默认缓存策略，减轻服务器压力并提升加载速度
-from starlette.staticfiles import StaticFiles as StarletteStaticFiles
 
 _static_dir = _get_frontend_dir() / "static"
 if _static_dir.exists():
